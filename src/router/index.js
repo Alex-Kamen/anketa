@@ -1,29 +1,95 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import DefaultLayout from '@/components/layout/DefaultLayout'
+import lscache from 'lscache'
 
 Vue.use(VueRouter)
-
-const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      redirect: '/dashboard',
+      component: DefaultLayout,
+      children: [
+        {
+          path: '/dashboard',
+          name: 'dashboard',
+          component: () => import('@/pages/DashboardPage')
+        },
+        {
+          path: '/answer/list',
+          name: 'List of answers',
+          component: () => import('@/pages/AnswerList')
+        },
+        {
+          path: '/discipline/list',
+          name: 'List of disciplines',
+          component: () => import('@/pages/DisciplineList')
+        },
+        {
+          path: '/form/edit',
+          name: 'Edit form',
+          component: () => import('@/pages/FormEdit')
+        },
+        {
+          path: '/form/list',
+          name: 'List of form',
+          component: () => import('@/pages/FormList')
+        },
+        {
+          path: '/form/:id',
+          name: 'form',
+          component: () => import('@/pages/FormPage')
+        },
+        {
+          path: '/speciality/list',
+          name: 'List of speciality',
+          component: () => import('@/pages/SpecialityList')
+        },
+        {
+          path: '/specialization/list',
+          name: 'List of specialization',
+          component: () => import('@/pages/SpecializationList')
+        },
+        {
+          path: '/department/list',
+          name: 'List of department',
+          component: () => import('@/pages/DepartmentList')
+        },
+        {
+          path: '/teacher/list',
+          name: 'List of teacher',
+          component: () => import('@/pages/TeacherList')
+        },
+        {
+          path: '/user/list',
+          name: 'List of user',
+          component: () => import('@/pages/UserList')
+        }
+      ]
+    },
+    {
+      path: '/auth',
+      name: 'Auth',
+      component: () => import('@/pages/AuthPage')
+    },
+    {
+      path: '/:catchAll(.*)',
+      redirect: '/'
+    }
+  ]
+})
+
+router.beforeEach((to, from, next) => {
+  if (from.name !== 'Auth' && to.name !== 'Auth' && !lscache.get('session')) {
+    next({ name: 'Auth' });
+  } else {
+    next();
+  }
 })
 
 export default router
